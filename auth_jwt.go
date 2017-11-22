@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"gopkg.in/dgrijalva/jwt-go.v3"
 )
 
@@ -176,7 +175,9 @@ func (mw *GinJWTMiddleware) middlewareImpl(c *gin.Context) {
 }
 
 // LoginHandler can be used by clients to get a jwt token.
-// Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
+// Payload needs to be either json or query in the form of:
+// {"username": "USERNAME", "password": "PASSWORD"}.
+// ?username=USERNAME&password=PASSWORD.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 
@@ -185,7 +186,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 
 	var loginVals Login
 
-	if c.ShouldBindWith(&loginVals, binding.JSON) != nil {
+	if c.ShouldBind(&loginVals) != nil {
 		mw.unauthorized(c, http.StatusBadRequest, "Missing Username or Password")
 		return
 	}
